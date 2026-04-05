@@ -271,6 +271,7 @@ create(char *path, short type, short major, short minor)
   ip->major = major;
   ip->minor = minor;
   ip->nlink = 1;
+  ip->permissions = 0x0;
   iupdate(ip);
 
   if(type == T_DIR){  // Create . and .. entries.
@@ -329,6 +330,12 @@ sys_open(void)
     }
     ilock(ip);
     if(ip->type == T_DIR && omode != O_RDONLY){
+      iunlockput(ip);
+      end_op();
+      return -1;
+    }
+    if((ip->permissions & F_UNREADABLE)) {
+      printf("open: tried to read unreadable file %s w/ permissions %d\n", path, ip->permissions);
       iunlockput(ip);
       end_op();
       return -1;
@@ -501,5 +508,33 @@ sys_pipe(void)
     fileclose(wf);
     return -1;
   }
+  return 0;
+}
+
+uint64
+sys_chmod(void)
+{
+  
+  int permissions;
+  char path[MAXPATH];
+  int n;
+  struct inode *ip;
+  
+  argint(1, &permissions);
+  if((n = argstr(0, path, MAXPATH)) < 0)
+    return -1;
+
+  begin_op();
+
+  if((ip = namei(path)) == 0){
+    end_op();
+    return -1;
+  }
+    
+  ilock(ip);
+  ip->permissions = permissions;
+  iupdate(ip);
+  iunlockput(ip);
+  end_op();
   return 0;
 }

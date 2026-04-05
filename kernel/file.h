@@ -1,3 +1,7 @@
+#define F_UNEXECUTABLE  0x4
+#define F_UNWRITABLE    0x2
+#define F_UNREADABLE    0x1
+
 struct file {
   enum { FD_NONE, FD_PIPE, FD_INODE, FD_DEVICE } type;
   int ref; // reference count
@@ -25,6 +29,8 @@ struct inode {
   short major;
   short minor;
   short nlink;
+  short permissions;
+
   uint size;
   uint addrs[NDIRECT+1];
 };

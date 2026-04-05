@@ -236,6 +236,7 @@ iupdate(struct inode *ip)
   dip->minor = ip->minor;
   dip->nlink = ip->nlink;
   dip->size = ip->size;
+  dip->permissions = ip->permissions;
   memmove(dip->addrs, ip->addrs, sizeof(ip->addrs));
   log_write(bp);
   brelse(bp);
@@ -309,6 +310,7 @@ ilock(struct inode *ip)
     ip->minor = dip->minor;
     ip->nlink = dip->nlink;
     ip->size = dip->size;
+    ip->permissions = dip->permissions;
     memmove(ip->addrs, dip->addrs, sizeof(ip->addrs));
     brelse(bp);
     ip->valid = 1;
@@ -485,6 +487,7 @@ stati(struct inode *ip, struct stat *st)
   st->type = ip->type;
   st->nlink = ip->nlink;
   st->size = ip->size;
+  st->permissions = ip->permissions;
 }
 
 // Read data from inode.

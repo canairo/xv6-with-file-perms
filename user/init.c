@@ -30,11 +30,30 @@ main(void)
       printf("init: fork failed\n");
       exit(1);
     }
+
     if(pid == 0){
       exec("sh", argv);
       printf("init: exec sh failed\n");
       exit(1);
     }
+
+    // create FLAG file
+    pid = fork();
+    if (pid == 0) {
+      char flag[0x10] = "test_flag";
+      int fd = open("flag", O_CREATE | O_WRONLY);
+      if (!fd) {
+        printf("init: flag open failed\n");
+        exit(1);
+      }
+      write(fd, flag, strlen(flag));
+      close(fd);
+      if (chmod("flag", 0x7) == -1) {
+        printf("init: chmod failed\n");
+      };
+      exit(1);
+    }
+    wait(0);
 
     for(;;){
       // this call to wait() returns if the shell exits,
